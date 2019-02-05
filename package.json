@@ -4,8 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "start": "npx webpack --mode=development --config webpack.config.js & node Server.js",
-    "build": "npx webpack --mode=production --config webpack.config.js"
+    "start": "webpack --mode=development & node server.js",
+    "build": "webpack --mode=production"
   },
   "keywords": [],
   "author": "",
