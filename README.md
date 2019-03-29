@@ -1,5 +1,5 @@
 # Some ThreeJS Boilerplate
-Minimal ThreeJS Boilerplate for rapid 3D development. Includes __express__, __webpack__, &amp; __threejs__.
+Minimal ThreeJS Boilerplate for rapid 3D development. Includes __webpack-dev-server__, &amp; __threejs__.
 
 Webpack entry point in `src/script.js`
 
