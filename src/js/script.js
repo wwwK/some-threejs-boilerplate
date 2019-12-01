@@ -1,4 +1,6 @@
-import { 
+import '../scss/main.scss';
+
+import {
     Scene,
     PerspectiveCamera,
     WebGLRenderer,
