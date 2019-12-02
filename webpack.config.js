@@ -54,15 +54,15 @@ module.exports = {
           }
         ]
       },
-      // {
-      //   // Here's a rule for 3D models
-      //   test: /\.(woff|woff2|eot|ttf|otf)$/,
-      //   loader: "file-loader",
-      //   options: {
-      //     name: '[name].[ext]',
-      //     outputPath: "../fonts"
-      //   }
-      // },
+      {
+        // Here's a rule for 3D models
+        test: /\.(obj|fbx|dae|stl|gltf|glb)$/,
+        loader: "file-loader",
+        options: {
+          name: '[name].[ext]',
+          outputPath: "../models"
+        }
+      },
       {
         // Here's a rule for fonts
         test: /\.(woff|woff2|eot|ttf|otf)$/,

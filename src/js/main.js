@@ -1,5 +1,3 @@
-import '../scss/main.scss';
-
 import {
     Scene,
     PerspectiveCamera,
@@ -10,6 +8,51 @@ import {
     Vector3,
     Color
 } from 'three';
+
+export default class Main {
+  constructor(container) {
+    // Define some high level app variables to keep track of
+    this.container = container;
+
+    // Assets can be easily referenced from here at any point by name
+    this.assets = {
+      models: {},
+      textures: {},
+      audio: {},
+      other: {}
+    }
+
+    // Move onto asset loading
+    this.loadAssets();
+  }
+
+  loadAssets = async () => {
+    // Load models, textures, and other assets
+    // ...
+
+    // Move onto scene building
+    this.buildScene();
+  }
+
+  buildScene = async () => {
+    // Create everything that will live in your scene
+    // ...
+    
+    // Move onto rendering
+    requestAnimationFrame(this.render.bind(this));
+  }
+
+  render = () => {
+    // Animation stuff and other changes that take place every frame
+    // ...
+    
+    // RAF
+    // Bind the main class instead of window object, DOUBLE CHECK THAT THIS IS A THING
+    requestAnimationFrame(this.render.bind(this));
+  }
+}
+
+/* ye old */
 
 let scene, renderer, camera, cube;
 
