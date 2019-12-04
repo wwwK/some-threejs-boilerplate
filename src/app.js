@@ -3,7 +3,7 @@ import { WEBGL } from './js/detector';
 import Main from './js/main';
 
 // Styles
-import '../scss/main.scss';
+import './scss/main.scss';
 
 (function init() {
   // Check for WebGL
