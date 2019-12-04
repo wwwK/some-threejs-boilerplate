@@ -1,7 +1,4 @@
 // Imports
-global.THREE = require('three');
-require('three/examples/js/controls/OrbitControls');
-
 import {
   BoxGeometry,
   CameraHelper,
@@ -16,6 +13,11 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
+
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2'
+
+import cactus from '../models/cactus/model.obj';
 
 export default class Main {
   constructor(container) {
@@ -66,7 +68,7 @@ export default class Main {
     this.container.appendChild(this.renderer.domElement);
 
     // Controls
-    this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+    this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 
     // Directional light
     this.directionalLight = new DirectionalLight(0xf0f0f0, 0.4);
@@ -91,6 +93,12 @@ export default class Main {
 
     this.scene.add(this.directionalLight);
     this.scene.add(this.directionalLightHelper);
+
+    // ObjLoader
+    const objLoader = new OBJLoader2();
+    objLoader.load(`..${cactus}`, (model) => {
+      // this.scene.add(model);
+    });
 
     // Objects
     const geometry = new BoxGeometry( 1, 1, 1 );

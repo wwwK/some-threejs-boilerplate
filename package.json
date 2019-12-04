@@ -4,14 +4,14 @@
   "description": "",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --hot",
+    "start": "webpack --mode=development && webpack-dev-server --watch --hot",
     "build": "webpack --mode=production"
   },
   "keywords": [],
   "author": "Ahmed Wageh",
   "license": "ISC",
   "dependencies": {
-    "three": "^0.98.0",
+    "three": "^0.111.0",
     "three-orbitcontrols": "^2.110.1"
   },
   "devDependencies": {

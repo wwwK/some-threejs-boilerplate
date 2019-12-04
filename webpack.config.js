@@ -17,6 +17,7 @@ module.exports = {
   },
   module: {
     rules: [
+      // Here's a rule for javascript files
       {
         test: /\.js$/,
         exclude: /(node_modules)/,
@@ -59,8 +60,8 @@ module.exports = {
         test: /\.(obj|fbx|dae|stl|gltf|glb)$/,
         loader: "file-loader",
         options: {
-          name: '[name].[ext]',
-          outputPath: "../models"
+          name: '[folder]/[name].[ext]',
+          outputPath: "/assets/models"
         }
       },
       {
@@ -69,7 +70,7 @@ module.exports = {
         loader: "file-loader",
         options: {
           name: '[name].[ext]',
-          outputPath: "../fonts"
+          outputPath: "/assets/fonts"
         }
       },
       {
@@ -84,7 +85,7 @@ module.exports = {
             // and directory to save
             options: {
               name: '[name].[ext]',
-              outputPath: '../images'
+              outputPath: '/assets/images'
             }
           }
         ]
@@ -93,7 +94,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '../dist/bundle.css'
+      filename: '/bundle.css'
     }),
     new OptimizeCssAssetsPlugin({
       cssProcessorPluginOptions: {
