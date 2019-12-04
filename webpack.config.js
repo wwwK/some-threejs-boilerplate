@@ -2,6 +2,7 @@ const path = require('path');
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: ['./src/app.js'],
@@ -100,6 +101,11 @@ module.exports = {
       cssProcessorPluginOptions: {
         preset: ['default', { discardComments: { removeAll: true } }]
       }
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './src/html/index.html',
+      inject: true
     })
   ]
 };
