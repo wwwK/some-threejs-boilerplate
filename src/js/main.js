@@ -40,6 +40,17 @@ export default class Main {
     // Load models, textures, and other assets
     // ...
 
+    // ObjLoader
+    this.objLoader = new OBJLoader2();
+
+    // Cactus
+    await new Promise( resolve => {
+      this.objLoader.load( `..${cactus}`, (model) => {
+        console.log(model);
+        resolve();
+      });
+    });
+
     // Move onto scene building
     this.buildScene();
   }
@@ -93,12 +104,6 @@ export default class Main {
 
     this.scene.add(this.directionalLight);
     this.scene.add(this.directionalLightHelper);
-
-    // ObjLoader
-    const objLoader = new OBJLoader2();
-    objLoader.load(`..${cactus}`, (model) => {
-      // this.scene.add(model);
-    });
 
     // Objects
     const geometry = new BoxGeometry( 1, 1, 1 );

@@ -32,7 +32,7 @@ module.exports = {
       {
         // Here's a rule for .sass, .scss, .css files
         test: /\.(sa|sc|c)ss$/,
-
+        
         // Set loaders. Loader execute from last to first
         use: [
           {
