@@ -1,6 +1,5 @@
-// Imports
+// Basic three.js imports
 import {
-  BoxGeometry,
   CameraHelper,
   Clock,
   Color,
@@ -10,14 +9,22 @@ import {
   MeshBasicMaterial,
   PerspectiveCamera,
   Scene,
+  SphereGeometry,
+  TextureLoader,
   Vector3,
   WebGLRenderer,
 } from 'three';
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2'
+// Loaders
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2';
 
+// Assets
+import noise from '../images/noise/luos/T_Random_47.png';
 import cactus from '../models/cactus/model.obj';
+
+// Shaders
+import TestShaderMaterial from '../js/shaders/TestShaderMaterial';
 
 export default class Main {
   constructor(container) {
@@ -40,16 +47,32 @@ export default class Main {
     // Load models, textures, and other assets
     // ...
 
-    // ObjLoader
-    this.objLoader = new OBJLoader2();
+    // Texture Loader
+    this.textureLoader = new TextureLoader();
 
-    // Cactus
+    // Noise texture
     await new Promise( resolve => {
-      this.objLoader.load( `..${cactus}`, (model) => {
-        console.log(model);
+      this.textureLoader.load( `..${noise}`, (noiseTexture) => {
+        console.log(`Loaded: ${noise}`);
+        this.assets.textures["noise"] = noiseTexture;
         resolve();
       });
     });
+
+    // .obj Loader
+    this.objLoader = new OBJLoader2();
+
+    // Cactus model
+    await new Promise( resolve => {
+      this.objLoader.load( `..${cactus}`, (cactusModel) => {
+        console.log(`Loaded: ${cactus}`);
+        this.assets.models["cactus"] = cactusModel;
+        resolve();
+      });
+    });
+
+    // Log all assets
+    console.log(this.assets);
 
     // Move onto scene building
     this.buildScene();
@@ -66,7 +89,7 @@ export default class Main {
     // Scene
     this.scene = new Scene();
     this.scene.background = new Color( 0xffffff );
-    this.scene.fog = new FogExp2(0xffffff, 0.0008);
+    this.scene.fog = new FogExp2(0x000000, 0);
     
     // Camera
     this.camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -106,10 +129,10 @@ export default class Main {
     this.scene.add(this.directionalLightHelper);
 
     // Objects
-    const geometry = new BoxGeometry( 1, 1, 1 );
-    const material = new MeshBasicMaterial( { color: 0x000000 } );
-    this.cube = new Mesh( geometry, material );
-    this.scene.add( this.cube );
+    const geometry = new SphereGeometry( 1, 20, 20 );
+    const material = new TestShaderMaterial({ noise: this.assets.textures["noise"] });
+    this.sphere = new Mesh( geometry, material );
+    this.scene.add( this.sphere );
 
     // Window resize event listener
     window.addEventListener('resize', () => {
@@ -132,9 +155,9 @@ export default class Main {
     const deltaTime = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
-    // Update cube
-    this.cube.position.set(0, Math.sin(elapsedTime), 0);
-    this.cube.rotation.set(0, Math.sin(elapsedTime+1), 0);
+    // Update sphere
+    this.sphere.position.set(0, Math.sin(elapsedTime), 0);
+    this.sphere.rotation.set(0, Math.sin(elapsedTime+1), 0);
 
     // Update controls
     this.controls.update();

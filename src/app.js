@@ -1,5 +1,5 @@
 // Dependencies
-import { WEBGL } from './js/detector';
+import { WEBGL } from './js/utils/detector';
 import Main from './js/main';
 
 // Styles
