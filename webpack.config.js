@@ -95,7 +95,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '/bundle.css'
+      filename: 'bundle.css'
     }),
     new OptimizeCssAssetsPlugin({
       cssProcessorPluginOptions: {

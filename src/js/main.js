@@ -1,3 +1,6 @@
+// Css imports
+import '../scss/main.scss';
+
 // Basic three.js imports
 import {
   CameraHelper,
@@ -6,11 +9,14 @@ import {
   DirectionalLight,
   FogExp2,
   Mesh,
-  MeshBasicMaterial,
+  MeshNormalMaterial,
+  MeshPhongMaterial,
   PerspectiveCamera,
+  PlaneBufferGeometry,
   Scene,
-  SphereGeometry,
+  SphereBufferGeometry,
   TextureLoader,
+  Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three';
@@ -23,14 +29,22 @@ import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2';
 import noise from '../images/noise/luos/T_Random_47.png';
 import cactus from '../models/cactus/model.obj';
 
-// Shaders
-import TestShaderMaterial from '../js/shaders/TestShaderMaterial';
+// Postprocessing
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import CopyShader from 'three/examples/jsm/shaders/CopyShader';
+
+// Custom Shaders
+import TestShaderMaterial from './shaders/TestShaderMaterial';
+import EdgeDetectionPass from './shaders/EdgeDetectionPass';
 
 export default class Main {
   constructor(container) {
     // Define some high level app variables to keep track of
     this.container = container;
-
+    this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
+    
     // Assets can be easily referenced from here at any point by name
     this.assets = {
       models: {},
@@ -88,8 +102,8 @@ export default class Main {
 
     // Scene
     this.scene = new Scene();
-    this.scene.background = new Color( 0xffffff );
-    this.scene.fog = new FogExp2(0x000000, 0);
+    this.scene.background = new Color( 0x000000 );
+    this.scene.fog = new FogExp2(0xffffff, 0);
     
     // Camera
     this.camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -99,6 +113,8 @@ export default class Main {
     // Renderer
     this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setSize( window.innerWidth, window.innerHeight );
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.renderReverseSided = false;
     this.container.appendChild(this.renderer.domElement);
 
     // Controls
@@ -126,20 +142,47 @@ export default class Main {
     this.directionalLightHelper.visible = true;
 
     this.scene.add(this.directionalLight);
-    this.scene.add(this.directionalLightHelper);
+    // this.scene.add(this.directionalLightHelper);
 
     // Objects
-    const geometry = new SphereGeometry( 1, 20, 20 );
-    const material = new TestShaderMaterial({ noise: this.assets.textures["noise"] });
-    this.sphere = new Mesh( geometry, material );
-    this.scene.add( this.sphere );
+    const matNormal = new MeshNormalMaterial();
+    const matShadow = new MeshPhongMaterial({
+      color: 0xffffff,
+      shininess: 0.0,
+    });
 
-    // Window resize event listener
+    const floorGeo = new PlaneBufferGeometry(2.0, 2.0);
+    const floor = new Mesh(floorGeo, matNormal);
+    floor.position.set(0, -0.5, 0);
+    floor.rotation.x = -((Math.PI * 90) / 180);
+    floor.receiveShadow = true;
+
+    const sphereGeo = new SphereBufferGeometry(0.5, 32, 32);
+    const sphere = new Mesh(sphereGeo, matNormal);
+    sphere.castShadow = true;
+    sphere.receiveShadow = true;
+
+    this.scene.add(floor);
+    this.scene.add(sphere);
+
+    // Post Processing
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    
+    this.edgeDetectionPass = new ShaderPass(new EdgeDetectionPass({
+      iResolution: { value: this.resolution },
+    }));  
+    this.composer.addPass(this.edgeDetectionPass);
+    
+    // Window resize event listeners
     window.addEventListener('resize', () => {
+      this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
+      this.edgeDetectionPass.uniforms.iResolution.value.set(this.resolution.width, this.resolution.height);
+
       if(this.camera && this.renderer) {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.aspect = this.resolution.width / this.resolution.height;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.renderer.setSize( this.resolution.width, this.resolution.height );
       }
     });
     
@@ -155,18 +198,20 @@ export default class Main {
     const deltaTime = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
+    console.log(this.resolution);
+
     // Update sphere
-    this.sphere.position.set(0, Math.sin(elapsedTime), 0);
-    this.sphere.rotation.set(0, Math.sin(elapsedTime+1), 0);
+    // this.sphere.position.set(0, Math.sin(elapsedTime), 0);
+    // this.sphere.rotation.set(0, Math.sin(elapsedTime+1), 0);
 
     // Update controls
     this.controls.update();
 
     // Render after all scene updates
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
+    this.composer.render();
     
     // RAF
-    // Bind the main class instead of window object, DOUBLE CHECK THAT THIS IS A THING
     requestAnimationFrame(this.render.bind(this));
   }
 }

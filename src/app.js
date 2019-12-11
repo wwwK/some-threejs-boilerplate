@@ -14,4 +14,3 @@ import './scss/main.scss';
     new Main(container);
   }
 })();
- 
