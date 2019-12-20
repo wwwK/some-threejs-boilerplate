@@ -3,22 +3,23 @@ import '../scss/main.scss';
 
 // Basic three.js imports
 import {
+  AmbientLight,
+  BoxBufferGeometry,
   CameraHelper,
   Clock,
   Color,
   DirectionalLight,
   FogExp2,
   Mesh,
-  MeshNormalMaterial,
-  MeshPhongMaterial,
+  PCFSoftShadowMap,
   PerspectiveCamera,
   PlaneBufferGeometry,
   Scene,
-  SphereBufferGeometry,
+  ShaderMaterial,
   TextureLoader,
   Vector2,
   Vector3,
-  WebGLRenderer,
+  WebGLRenderer
 } from 'three';
 
 // Loaders
@@ -33,11 +34,10 @@ import cactus from '../models/cactus/model.obj';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import CopyShader from 'three/examples/jsm/shaders/CopyShader';
 
 // Custom Shaders
 import TestShaderMaterial from './shaders/TestShaderMaterial';
-import EdgeDetectionPass from './shaders/EdgeDetectionPass';
+import TestShaderPass from './shaders/TestShaderPass';
 
 export default class Main {
   constructor(container) {
@@ -102,87 +102,98 @@ export default class Main {
 
     // Scene
     this.scene = new Scene();
-    this.scene.background = new Color( 0x000000 );
-    this.scene.fog = new FogExp2(0xffffff, 0);
+    this.scene.background = new Color( 0xffffff );
+    // this.scene.background = new Color( 0x000000 );
+    this.scene.fog = new FogExp2(0x000000, 0);
     
     // Camera
-    this.camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    this.camera.position.set(5, 5, 5);
-    this.camera.lookAt(new Vector3(0, 0, 0));
+    this.camera = new PerspectiveCamera( 40, this.resolution.width / this.resolution.height, 10, 200 );
+    this.camera.position.set(50, 50, 50);
 
     // Renderer
     this.renderer = new WebGLRenderer({ antialias: true });
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    this.renderer.setSize( this.resolution.width, this.resolution.height );
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.renderReverseSided = false;
+    this.renderer.shadowMap.shadowSide = true;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.container.appendChild(this.renderer.domElement);
 
     // Controls
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+    this.controls.target = new Vector3(0, 0, 0);
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 1;
+
+    // Ambient light
+    this.ambientLight = new AmbientLight(0xffffff, 0.4);
+    this.ambientLight.visible = true;
 
     // Directional light
-    this.directionalLight = new DirectionalLight(0xf0f0f0, 0.4);
-    this.directionalLight.position.set(0, 10, 0);
+    this.directionalLight = new DirectionalLight(0xffffff, 1.0);
+    this.directionalLight.position.set(-10, 17.5, 10);
     this.directionalLight.visible = true;
 
-    // Shadow map
+    // Shadow settings
     this.directionalLight.castShadow = true;
-    this.directionalLight.shadow.bias = 0;
-    this.directionalLight.shadow.camera.near = 250;
-    this.directionalLight.shadow.camera.far = 400;
+    this.directionalLight.shadow.bias =  -0.0001;
+    // this.directionalLight.shadow.camera.near = 250;
+    // this.directionalLight.shadow.camera.far = 3500;
     this.directionalLight.shadow.camera.left = -100;
     this.directionalLight.shadow.camera.right = 100;
     this.directionalLight.shadow.camera.top = 100;
     this.directionalLight.shadow.camera.bottom = -100;
-    this.directionalLight.shadow.mapSize.width = 2048;
-    this.directionalLight.shadow.mapSize.height = 2048;
+    this.directionalLight.shadow.mapSize.width = 2048*4;
+    this.directionalLight.shadow.mapSize.height = 2048*4;
 
     // Shadow camera helper
     this.directionalLightHelper = new CameraHelper(this.directionalLight.shadow.camera);
     this.directionalLightHelper.visible = true;
 
+    // this.scene.add(this.ambientLight);
     this.scene.add(this.directionalLight);
     // this.scene.add(this.directionalLightHelper);
 
     // Objects
-    const matNormal = new MeshNormalMaterial();
-    const matShadow = new MeshPhongMaterial({
-      color: 0xffffff,
-      shininess: 0.0,
-    });
+    this.testShaderMaterial = new TestShaderMaterial();
 
-    const floorGeo = new PlaneBufferGeometry(2.0, 2.0);
-    const floor = new Mesh(floorGeo, matNormal);
-    floor.position.set(0, -0.5, 0);
-    floor.rotation.x = -((Math.PI * 90) / 180);
-    floor.receiveShadow = true;
+    this.floorGeo = new PlaneBufferGeometry(6, 6);
+    this.floor = new Mesh(this.floorGeo);
+    this.floor.position.set(0, 0, 0);
+    this.floor.rotation.x = -((Math.PI * 90) / 180);
+    this.floor.receiveShadow = true;
 
-    const sphereGeo = new SphereBufferGeometry(0.5, 32, 32);
-    const sphere = new Mesh(sphereGeo, matNormal);
-    sphere.castShadow = true;
-    sphere.receiveShadow = true;
+    this.scene.add(this.floor);
 
-    this.scene.add(floor);
-    this.scene.add(sphere);
+    this.boxGeo = new BoxBufferGeometry(10, 10, 10);
+    this.box = new Mesh(this.boxGeo);
+    this.box.castShadow = true;
+    this.box.receiveShadow = true;
+    
+    this.scene.add(this.box);
 
     // Post Processing
     this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+    // First, base pass
+    this.basePass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.basePass);
     
-    this.edgeDetectionPass = new ShaderPass(new EdgeDetectionPass({
-      iResolution: { value: this.resolution },
-    }));  
-    this.composer.addPass(this.edgeDetectionPass);
-    
+    // Edge detection pass
+    this.testShaderPass = new ShaderPass(new TestShaderPass());  
+    this.composer.addPass(this.testShaderPass);
+
     // Window resize event listeners
     window.addEventListener('resize', () => {
-      this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
-      this.edgeDetectionPass.uniforms.iResolution.value.set(this.resolution.width, this.resolution.height);
-
       if(this.camera && this.renderer) {
+        this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
+
         this.camera.aspect = this.resolution.width / this.resolution.height;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize( this.resolution.width, this.resolution.height );
+        this.renderer.setSize(this.resolution.width, this.resolution.height);
+        this.composer.setSize(this.resolution.width, this.resolution.height);
+
+        this.edgeDetectionPass.uniforms.iResolution.value = this.resolution;
+        this.shadowAndDepthBuffer.setSize(this.resolution.width, this.resolution.height);
       }
     });
     
@@ -198,20 +209,18 @@ export default class Main {
     const deltaTime = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
-    console.log(this.resolution);
-
-    // Update sphere
-    // this.sphere.position.set(0, Math.sin(elapsedTime), 0);
-    // this.sphere.rotation.set(0, Math.sin(elapsedTime+1), 0);
-
     // Update controls
     this.controls.update();
 
+    // Update objects
+    this.box.position.y = 10 + Math.sin(elapsedTime);
+    this.box.rotation.x = elapsedTime;
+    this.box.rotation.y = elapsedTime;
+
     // Render after all scene updates
-    // this.renderer.render(this.scene, this.camera);
     this.composer.render();
-    
-    // RAF
+
+    // RAF and do it all again baby
     requestAnimationFrame(this.render.bind(this));
   }
 }
