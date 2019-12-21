@@ -15,6 +15,6 @@ export default class TestShaderMaterial extends ShaderMaterial {
       `
     });
 
-    this.uniforms = uniforms;
+    this.uniforms = { ...uniforms };
   }
 }

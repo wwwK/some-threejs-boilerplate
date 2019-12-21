@@ -16,12 +16,17 @@ export default class OutlinePass {
       varying vec2 vUv;
 
       void main() {
+        // Invert colors
+        gl_FragColor = 1.0 - texture2D(tDiffuse, vUv);
+
+
         // Previous pass - debug
-        gl_FragColor = texture2D(tDiffuse, vUv);
+        // gl_FragColor = texture2D(tDiffuse, vUv);
       }
     `;
 
     this.uniforms = {
+      ...uniforms,
       tDiffuse: { type: 't', value: null }
     };
   }

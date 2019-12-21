@@ -15,7 +15,6 @@ import {
   PerspectiveCamera,
   PlaneBufferGeometry,
   Scene,
-  ShaderMaterial,
   TextureLoader,
   Vector2,
   Vector3,
@@ -120,7 +119,7 @@ export default class Main {
 
     // Controls
     this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-    this.controls.target = new Vector3(0, 0, 0);
+    this.controls.target = new Vector3(0, 10, 0);
     this.controls.autoRotate = true;
     this.controls.autoRotateSpeed = 1;
 
@@ -157,7 +156,7 @@ export default class Main {
     this.testShaderMaterial = new TestShaderMaterial();
 
     this.floorGeo = new PlaneBufferGeometry(6, 6);
-    this.floor = new Mesh(this.floorGeo);
+    this.floor = new Mesh(this.floorGeo, this.testShaderMaterial);
     this.floor.position.set(0, 0, 0);
     this.floor.rotation.x = -((Math.PI * 90) / 180);
     this.floor.receiveShadow = true;
@@ -165,7 +164,7 @@ export default class Main {
     this.scene.add(this.floor);
 
     this.boxGeo = new BoxBufferGeometry(10, 10, 10);
-    this.box = new Mesh(this.boxGeo);
+    this.box = new Mesh(this.boxGeo, this.testShaderMaterial);
     this.box.castShadow = true;
     this.box.receiveShadow = true;
     
@@ -179,21 +178,18 @@ export default class Main {
     this.composer.addPass(this.basePass);
     
     // Edge detection pass
-    this.testShaderPass = new ShaderPass(new TestShaderPass());  
+    this.testShaderPass = new ShaderPass(new TestShaderPass({}));  
     this.composer.addPass(this.testShaderPass);
-
+    
     // Window resize event listeners
     window.addEventListener('resize', () => {
       if(this.camera && this.renderer) {
         this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
-
+s
         this.camera.aspect = this.resolution.width / this.resolution.height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.resolution.width, this.resolution.height);
         this.composer.setSize(this.resolution.width, this.resolution.height);
-
-        this.edgeDetectionPass.uniforms.iResolution.value = this.resolution;
-        this.shadowAndDepthBuffer.setSize(this.resolution.width, this.resolution.height);
       }
     });
     
