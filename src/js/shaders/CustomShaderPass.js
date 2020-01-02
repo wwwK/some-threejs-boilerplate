@@ -1,4 +1,4 @@
-export default class OutlinePass {
+export default class CustomShaderPass {
   constructor(uniforms) {
     this.vertexShader = `
       varying vec2 vUv;
@@ -18,7 +18,6 @@ export default class OutlinePass {
       void main() {
         // Invert colors
         gl_FragColor = 1.0 - texture2D(tDiffuse, vUv);
-
 
         // Previous pass - debug
         // gl_FragColor = texture2D(tDiffuse, vUv);

@@ -1,6 +1,6 @@
 import { ShaderMaterial } from "three";
 
-export default class TestShaderMaterial extends ShaderMaterial {
+export default class CustomShaderMaterial extends ShaderMaterial {
   constructor(uniforms) {
     super({
       vertexShader: `

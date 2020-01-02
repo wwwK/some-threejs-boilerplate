@@ -31,12 +31,12 @@ import cactus from '../models/cactus/model.obj';
 
 // Postprocessing
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 
 // Custom Shaders
-import TestShaderMaterial from './shaders/TestShaderMaterial';
-import TestShaderPass from './shaders/TestShaderPass';
+import CustomShaderMaterial from './shaders/CustomShaderMaterial';
+import CustomShaderPass from './shaders/CustomShaderPass';
 
 export default class Main {
   constructor(container) {
@@ -107,6 +107,7 @@ export default class Main {
     
     // Camera
     this.camera = new PerspectiveCamera( 40, this.resolution.width / this.resolution.height, 10, 200 );
+    // Consider ortho camera as well
     this.camera.position.set(50, 50, 50);
 
     // Renderer
@@ -153,10 +154,10 @@ export default class Main {
     // this.scene.add(this.directionalLightHelper);
 
     // Objects
-    this.testShaderMaterial = new TestShaderMaterial();
+    this.customShaderMaterial = new CustomShaderMaterial();
 
     this.floorGeo = new PlaneBufferGeometry(6, 6);
-    this.floor = new Mesh(this.floorGeo, this.testShaderMaterial);
+    this.floor = new Mesh(this.floorGeo, this.customShaderMaterial);
     this.floor.position.set(0, 0, 0);
     this.floor.rotation.x = -((Math.PI * 90) / 180);
     this.floor.receiveShadow = true;
@@ -164,7 +165,7 @@ export default class Main {
     this.scene.add(this.floor);
 
     this.boxGeo = new BoxBufferGeometry(10, 10, 10);
-    this.box = new Mesh(this.boxGeo, this.testShaderMaterial);
+    this.box = new Mesh(this.boxGeo, this.customShaderMaterial);
     this.box.castShadow = true;
     this.box.receiveShadow = true;
     
@@ -177,15 +178,14 @@ export default class Main {
     this.basePass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.basePass);
     
-    // Edge detection pass
-    this.testShaderPass = new ShaderPass(new TestShaderPass({}));  
-    this.composer.addPass(this.testShaderPass);
-    
+    // Custom shader pass
+    this.customShaderPass = new ShaderPass(new CustomShaderPass());
+    this.composer.addPass(this.customShaderPass);
+
     // Window resize event listeners
     window.addEventListener('resize', () => {
       if(this.camera && this.renderer) {
         this.resolution = new Vector2(this.container.clientWidth, this.container.clientHeight);
-s
         this.camera.aspect = this.resolution.width / this.resolution.height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.resolution.width, this.resolution.height);
@@ -193,11 +193,11 @@ s
       }
     });
     
-    // Move onto rendering
-    this.render();
+    // Move onto updating & rendering
+    this.update();
   }
 
-  render() {
+  update() {
     // Animation stuff and other changes that take place every frame
     // ...
 
@@ -217,6 +217,6 @@ s
     this.composer.render();
 
     // RAF and do it all again baby
-    requestAnimationFrame(this.render.bind(this));
+    requestAnimationFrame(this.update.bind(this));
   }
 }
