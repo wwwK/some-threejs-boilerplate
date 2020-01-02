@@ -43,14 +43,14 @@ src/
 <br>&nbsp;&nbsp;|- images/
 <br>&nbsp;&nbsp;|- models/
 
-app.js</span> is the webpack entry point reserved for compatibility checks and any other processes that take place **before** the three.js scene is initialized.
+app.js is the webpack entry point reserved for compatibility checks and any other processes that take place **before** the three.js scene is initialized.
 
-main.js</span> is where all of our three.js lives.
+main.js is where all of our three.js lives.
 
 ### main.js workflow
 
 #### 1. constructor(container)
-The main</span> class is instantiated in app.js</span> and takes only one argument, the canvas DOM element we'd like to render to. This constructor also defines some higher-level variables such as the resolution of our container and an assets object that hold references for anything we're loading in such as models, textures, and audio.
+The main class is instantiated in app.js and takes only one argument, the canvas DOM element we'd like to render to. This constructor also defines some higher-level variables such as the resolution of our container and an assets object that hold references for anything we're loading in such as models, textures, and audio.
 
 #### 2. loadAssets()
 This function handles the loading of any external assets. The asyncronous loading processes are preceded with await to ensure that everything is loaded and ready to be used before moving on. 
