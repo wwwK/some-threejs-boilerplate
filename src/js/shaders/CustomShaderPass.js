@@ -1,32 +1,35 @@
-export default class CustomShaderPass {
+import { ShaderMaterial } from "three";
+
+export default class CustomShaderPass extends ShaderMaterial {
   constructor(uniforms) {
-    this.vertexShader = `
-      varying vec2 vUv;
-      
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.);
-        vUv = uv;
+    super({
+      vertexShader: `
+        varying vec2 vUv;
+        
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.);
+          vUv = uv;
 
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `;
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
 
-    this.fragmentShader = `
-      uniform sampler2D tDiffuse;
-      varying vec2 vUv;
+        void main() {
+          // Invert colors
+          gl_FragColor = 1.0 - texture2D(tDiffuse, vUv);
 
-      void main() {
-        // Invert colors
-        gl_FragColor = 1.0 - texture2D(tDiffuse, vUv);
-
-        // Previous pass - debug
-        // gl_FragColor = texture2D(tDiffuse, vUv);
-      }
-    `;
+          // Previous pass - debug
+          // gl_FragColor = texture2D(tDiffuse, vUv);
+        }
+      `,
+    });
 
     this.uniforms = {
       ...uniforms,
-      tDiffuse: { type: 't', value: null }
+      tDiffuse: { type: "t", value: null },
     };
   }
 }

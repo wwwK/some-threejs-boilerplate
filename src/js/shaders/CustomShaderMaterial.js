@@ -12,7 +12,7 @@ export default class CustomShaderMaterial extends ShaderMaterial {
         void main() {
           gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
         }
-      `
+      `,
     });
 
     this.uniforms = { ...uniforms };
