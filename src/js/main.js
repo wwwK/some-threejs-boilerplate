@@ -23,7 +23,7 @@ import {
 
 // Loaders
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { OBJLoader2 } from 'three/examples/jsm/loaders/OBJLoader2';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
 // Assets
 import noise from '../images/noise/luos/T_Random_47.png';
@@ -73,7 +73,7 @@ export default class Main {
     });
 
     // .obj Loader
-    this.objLoader = new OBJLoader2();
+    this.objLoader = new OBJLoader();
 
     // Cactus model
     await new Promise( resolve => {
